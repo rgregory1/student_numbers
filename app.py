@@ -288,9 +288,6 @@ wb.save(cwd / "complete_data" / data_sheet_name)
 # /Users/rgregory/Documents/trial
 
 my_file = cwd / "complete_data" / data_sheet_name
-to_file = "/Users/rgregory/Documents/trial/" + data_sheet_name
+# to_file = "/Users/rgregory/Documents/trial/" + data_sheet_name
+to_file = "/Users/admin/Documents/student_numbers/" + data_sheet_name
 my_file.rename(to_file)
-
-# import shutil
-
-# shutil.move(my_file, to_file)
