@@ -1,5 +1,6 @@
 from datetime import date
 import pathlib
+import csv
 from getmac import get_mac_address as gma
 
 import pandas as pd
@@ -16,7 +17,12 @@ print(gma())
 
 
 grab_files(
-    ["03_4_PS_Enroll.csv", "03_5_PS_GradeProg.csv", "04_5A_Public_PreK_Stu_Link.csv"],
+    [
+        "03_4_PS_Enroll.csv",
+        "03_5_PS_GradeProg.csv",
+        "04_5A_Public_PreK_Stu_Link.csv",
+        "racedata.csv",
+    ],
     cwd,
 )
 
@@ -257,6 +263,186 @@ grid3.loc["Total"] = grid3.sum(numeric_only=True, axis=0)
 grid3["F/R Percentage"] = grid3["F/R Total"] / grid3["Total Enrollment"]
 grid3["F/R Percentage"] = grid3["F/R Percentage"].astype(float).map("{:.2%}".format)
 
+## ------------------------------------------------------------------------------
+## begin single race data
+
+# grab fresh copy of enrollment
+race = total_enroll.copy()
+
+
+# load race data from PS export
+df_raw_race = pd.read_csv(cwd / "data_files" / "racedata.csv", header=None, dtype=str)
+df_raw_race.columns = ["PERMNUMBER", "Race"]
+
+# merge data to enrollment
+race_data = pd.merge(race, df_raw_race, how="left", on=["PERMNUMBER"])
+
+
+# reduce data to only school and race column
+race_data = race_data.iloc[:, [0, 1, 11]].copy()
+
+# save to csv for old school python processing
+race_data.to_csv(cwd / "data_files" / "race_data.csv", index=False)
+
+race_file = cwd / "data_files" / "race_data.csv"
+
+# create variable for totals
+mvu_w = 0
+mvu_i = 0
+mvu_a = 0
+mvu_b = 0
+mvu_h = 0
+mvu_p = 0
+
+fcs_w = 0
+fcs_i = 0
+fcs_a = 0
+fcs_b = 0
+fcs_h = 0
+fcs_p = 0
+
+hes_w = 0
+hes_i = 0
+hes_a = 0
+hes_b = 0
+hes_h = 0
+hes_p = 0
+
+swa_w = 0
+swa_i = 0
+swa_a = 0
+swa_b = 0
+swa_h = 0
+swa_p = 0
+
+with open(race_file, "r") as data:
+    for line in csv.reader(data):
+        if line[1]:
+            # print(line)
+            if line[0] == "PS187":
+                if line[2] == "W":
+                    mvu_w += 1
+                elif line[2] == "I":
+                    mvu_i += 1
+                elif line[2] == "A":
+                    mvu_a += 1
+                elif line[2] == "B":
+                    mvu_b += 1
+                elif line[2] == "H":
+                    mvu_h += 1
+                elif line[2] == "P":
+                    mvu_p += 1
+            if line[0] == "PS115":
+                if line[2] == "W":
+                    fcs_w += 1
+                elif line[2] == "I":
+                    fcs_i += 1
+                elif line[2] == "A":
+                    fcs_a += 1
+                elif line[2] == "B":
+                    fcs_b += 1
+                elif line[2] == "H":
+                    fcs_h += 1
+                elif line[2] == "P":
+                    fcs_p += 1
+            if line[0] == "PS142":
+                if line[2] == "W":
+                    hes_w += 1
+                elif line[2] == "I":
+                    hes_i += 1
+                elif line[2] == "A":
+                    hes_a += 1
+                elif line[2] == "B":
+                    hes_b += 1
+                elif line[2] == "H":
+                    hes_h += 1
+                elif line[2] == "P":
+                    hes_p += 1
+            if line[0] == "PS295":
+                if line[2] == "W":
+                    swa_w += 1
+                elif line[2] == "I":
+                    swa_i += 1
+                elif line[2] == "A":
+                    swa_a += 1
+                elif line[2] == "B":
+                    swa_b += 1
+                elif line[2] == "H":
+                    swa_h += 1
+                elif line[2] == "P":
+                    swa_p += 1
+
+
+fcs_total = fcs_h + fcs_i + fcs_a + fcs_b + fcs_p + fcs_w
+hes_total = hes_h + hes_i + hes_a + hes_b + hes_p + hes_w
+swa_total = swa_h + swa_i + swa_a + swa_b + swa_p + swa_w
+mvu_total = mvu_h + mvu_i + mvu_a + mvu_b + mvu_p + mvu_w
+
+df_race = pd.DataFrame(
+    [
+        (
+            fcs_h,
+            fcs_i,
+            fcs_a,
+            fcs_b,
+            fcs_p,
+            fcs_w,
+            fcs_total,
+        ),
+        (
+            hes_h,
+            hes_i,
+            hes_a,
+            hes_b,
+            hes_p,
+            hes_w,
+            hes_total,
+        ),
+        (
+            swa_h,
+            swa_i,
+            swa_a,
+            swa_b,
+            swa_p,
+            swa_w,
+            swa_total,
+        ),
+        (
+            mvu_h,
+            mvu_i,
+            mvu_a,
+            mvu_b,
+            mvu_p,
+            mvu_w,
+            mvu_total,
+        ),
+        (
+            mvu_h + fcs_h + hes_h + swa_h,
+            mvu_i + fcs_i + hes_i + swa_i,
+            mvu_a + fcs_a + hes_a + swa_a,
+            mvu_b + fcs_b + hes_b + swa_b,
+            mvu_p + fcs_p + hes_p + swa_p,
+            mvu_w + fcs_w + hes_w + swa_w,
+            mvu_total + fcs_total + hes_total + swa_total,
+        ),
+    ],
+    index=["FCS", "HES", "SWA", "MVU", "Total"],
+    columns=(
+        "Hispanic",
+        "American Indian",
+        "Asian",
+        "Black",
+        "Islander",
+        "White",
+        "Total",
+    ),
+)
+
+# print(df)
+
+## ------------------------------------------------------------------------------
+## begin presenting data in excell sheet
+
 # get datetime for naming
 today = date.today()
 d1 = today.strftime("%d/%m/%Y")
@@ -270,6 +456,7 @@ writer = pd.ExcelWriter(cwd / "complete_data" / data_sheet_name, engine="xlsxwri
 
 
 final_numbers.to_excel(writer, sheet_name="Students by Grade and School")
+df_race.to_excel(writer, sheet_name="Students by Single Ethnicity")
 multi_race_data.to_excel(writer, sheet_name="Students by Ethnic - wMulti")
 grid3.to_excel(writer, sheet_name="Students by F-R Lunch")
 
