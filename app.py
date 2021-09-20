@@ -20,7 +20,7 @@ grab_files(
     [
         "03_4_PS_Enroll.csv",
         "03_5_PS_GradeProg.csv",
-        "04_5A_Public_PreK_Stu_Link.csv",
+        "06_5A_Public_PreK_Stu_Link.csv",
         "racedata.csv",
     ],
     cwd,
@@ -60,7 +60,7 @@ ee_kids_num = len(ee_kids)
 
 ## -------------------------------------------------------------------
 ## load PK info files
-df_PK = pd.read_csv(cwd / "data_files" / "04_5A_Public_PreK_Stu_Link.csv", dtype=str)
+df_PK = pd.read_csv(cwd / "data_files" / "06_5A_Public_PreK_Stu_Link.csv", dtype=str)
 
 # get number of ALL PK
 all_pk = len(df_PK)
