@@ -28,5 +28,5 @@ for file in file_list:
         to_file = "/Users/rgregory/Documents/trial/" + file
         my_file.rename(to_file)
     else:
-        to_file = "/Users/admin/Documents/PS_GC_synch/" + file
+        to_file = "/Users/admin/Documents/student_numbers/" + file
         my_file.rename(to_file)
